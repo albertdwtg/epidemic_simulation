@@ -87,9 +87,7 @@ pop = Population(size = 10,
                  immunity_prob = 0.5)
 pop.generate_list_of_persons()
 pop.neighbors_attribution()
-print(np.random.choice([0,1], p=[0.8, 0.2]))
 for person in pop.persons:
-    print("for")
     print(person)
 
 print(pop)
