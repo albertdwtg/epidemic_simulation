@@ -1,6 +1,7 @@
 import json
 from enum import Enum
 from typing import List
+import numpy as np
 
 DAYS_BEFORE_HEALING = 7
 
@@ -33,7 +34,8 @@ class Person:
                  position_x: float, 
                  position_y: float, 
                  initial_status: Status, 
-                 radius_neighbors: float):
+                 radius_neighbors: float,
+                 probability_to_die: float):
         """Class that defines a person
 
         Args:
@@ -42,6 +44,7 @@ class Person:
             position_y (float): position on y axis of the person
             initial_status (Status): initial status given at the beginning of the simulation
             radius_neighbors (float): radius that defines the area of the persons's neighborhood
+            probability_to_die (float): for each day of disease, probability for a person to die
         """
         self.id = id
         self.position_x = position_x
@@ -51,6 +54,7 @@ class Person:
         self.neighborood_area = NeighbourhoodArea(self.position_x, 
                                                   self.position_y, 
                                                   radius_neighbors)
+        self.probability_to_die = probability_to_die
         self.neighbors: List[int] = []
     
     def update_status(self):
@@ -58,12 +62,17 @@ class Person:
         """
         if (self.status == Status.SICK.value) and (self.consecutive_days_seek >= DAYS_BEFORE_HEALING):
             self.status = Status.IMMUNE.value
+            self.consecutive_days_seek = 0
     
     def next_epoch(self):
         """Function that defines the next state of a person
         """
         if (self.status == Status.SICK.value):
             self.consecutive_days_seek += 1 
+        is_dead = np.random.choice([True, False], p=[self.probability_to_die, 1-self.probability_to_die])
+        if is_dead:
+            self.status = Status.DEAD.value
+            self.consecutive_days_seek = 0
     
     def genererate_list_of_neighbors(self, list_of_persons):
         """Function that creates the list of neighbors of a person

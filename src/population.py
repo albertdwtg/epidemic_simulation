@@ -6,7 +6,8 @@ from typing import List
 
 class Population:
     def __init__(self, size: int, positionnal_variance: float, 
-                 radius_neighbors: float, nb_infected: int, immunity_prob: float):
+                 radius_neighbors: float, nb_infected: int, immunity_prob: float,
+                 probability_to_die: float):
         """Class that aggregates a list of persons
 
         Args:
@@ -14,13 +15,15 @@ class Population:
             positionnal_variance (float): variance of positions between persons
             radius_neighbors (float): distance that tell if a person is a neighbor or not of another person
             nb_infected (int): nb of people infected at the creation of the population
-            immunity_prob (float): among all healthy persons, probability to be immune 
+            immunity_prob (float): among all healthy persons, probability to be immune at the beginning  
+            probability_to_die (float): for each day of disease, probability for a person to die
         """
         self.size = size
         self.positionnal_variance = positionnal_variance
         self.radius_neighbors = radius_neighbors
         self.nb_infected = nb_infected
         self.immunity_prob = immunity_prob
+        self.probability_to_die = probability_to_die
         self.persons: List[Person] = []
     
     def get_person_by_id(self, id_to_retrieve: int) -> Person:
@@ -51,13 +54,13 @@ class Population:
             position_x = all_possible_x[i]
             position_y = all_possible_y[i]
             if i in persons_infected_ids:
-                person = Person(i, position_x, position_y, Status.SICK, self.radius_neighbors)
+                person = Person(i, position_x, position_y, Status.SICK, self.radius_neighbors, self.probability_to_die)
             else:
                 is_immune = np.random.choice([True, False], p=[self.immunity_prob, 1-self.immunity_prob])
                 if is_immune:
-                    person = Person(i, position_x, position_y, Status.IMMUNE, self.radius_neighbors)
+                    person = Person(i, position_x, position_y, Status.IMMUNE, self.radius_neighbors, self.probability_to_die)
                 else:
-                    person = Person(i, position_x, position_y, Status.HEALTHY, self.radius_neighbors)
+                    person = Person(i, position_x, position_y, Status.HEALTHY, self.radius_neighbors, self.probability_to_die)
             all_population.append(person)
         
         self.persons = all_population
@@ -80,11 +83,12 @@ class Population:
                     infos[f"current_{status.value}"]+=1
         return str(infos)
         
-pop = Population(size = 10, 
+pop = Population(size = 100, 
                  positionnal_variance = 2, 
                  radius_neighbors = 1, 
                  nb_infected = 2, 
-                 immunity_prob = 0.5)
+                 immunity_prob = 0.5,
+                 probability_to_die = 0.1)
 pop.generate_list_of_persons()
 pop.neighbors_attribution()
 for person in pop.persons:
